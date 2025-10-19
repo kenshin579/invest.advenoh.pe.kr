@@ -4,18 +4,13 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev": "NODE_ENV=development tsx server/index.ts",
-    "dev:nextjs": "next dev",
-    "build": "npm run build:nextjs",
-    "build:nextjs": "next build",
-    "build:server": "esbuild server/index.ts --bundle --platform=node --outfile=dist/index.js --format=esm",
-    "build:prod": "npm run build:nextjs",
-    "start": "NODE_ENV=production tsx server/index.ts",
-    "start:nextjs": "next start -p $PORT",
-    "start:prod": "NODE_ENV=production tsx server/index.ts",
+    "dev": "next dev",
+    "prebuild": "npx tsx scripts/generateStaticData.ts",
+    "build": "next build",
+    "postbuild": "npx tsx scripts/generateSitemap.ts && npx tsx scripts/generateRssFeed.ts && npx tsx scripts/generateRobots.ts",
+    "start": "npx serve out",
     "check": "tsc",
     "lint": "next lint",
-    "db:push": "drizzle-kit push",
     "test:performance": "./test-performance.sh"
   },
   "dependencies": {
