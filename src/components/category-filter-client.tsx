@@ -1,7 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 interface Category {
@@ -16,14 +15,14 @@ interface CategoryFilterClientProps {
   selectedTags?: string[];
 }
 
-export function CategoryFilterClient({ 
-  categories, 
-  selectedCategory: initialCategory = 'all',
+export function CategoryFilterClient({
+  categories,
+  selectedCategory = 'all',
   searchTerm = '',
   selectedTags = []
 }: CategoryFilterClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory)
-  
+  const router = useRouter()
+
   const allCategories = [
     { id: "all", label: "전체" },
     ...(Array.isArray(categories) ? categories.map(({ category }) => ({
@@ -33,8 +32,6 @@ export function CategoryFilterClient({
   ]
 
   const handleCategoryChange = (category: string) => {
-    setSelectedCategory(category)
-    
     // URL 파라미터 구성
     const params = new URLSearchParams()
     if (category !== 'all') {
@@ -46,11 +43,10 @@ export function CategoryFilterClient({
     if (selectedTags.length > 0) {
       params.set('tags', selectedTags[0])
     }
-    
-    // 페이지 이동
+
+    // 클라이언트 사이드 네비게이션 (페이지 리로드 없음)
     const url = params.toString() ? `/?${params.toString()}` : '/'
-    window.history.pushState({}, '', url)
-    window.location.reload()
+    router.push(url)
   }
 
   return (

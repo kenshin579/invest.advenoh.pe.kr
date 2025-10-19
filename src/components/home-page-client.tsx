@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { BlogPost } from '@/types/blog'
 import { Hero } from './hero'
@@ -16,48 +17,56 @@ interface HomePageClientProps {
 export function HomePageClient({ posts, categories }: HomePageClientProps) {
   const searchParams = useSearchParams()
 
-  // 필터링 로직
+  // URL 파라미터
   const selectedCategory = searchParams.get('category') || 'all'
   const searchTerm = searchParams.get('search') || ''
   const selectedTags = searchParams.get('tags') ? [searchParams.get('tags')!] : []
   const currentPage = parseInt(searchParams.get('page') || '1')
   const postsPerPage = 9
 
-  // 카테고리 필터링
-  let filteredPosts = posts
-  if (selectedCategory !== 'all') {
-    const selectedLower = selectedCategory.toLowerCase()
-    filteredPosts = posts.filter(post =>
-      post.categories.some(c => c.toLowerCase() === selectedLower)
-    )
-  }
+  // 필터링 및 정렬 로직 (useMemo로 최적화)
+  const sortedPosts = useMemo(() => {
+    let filteredPosts = posts
 
-  // 검색 필터링
-  if (searchTerm) {
-    filteredPosts = filteredPosts.filter(post =>
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  }
+    // 카테고리 필터링
+    if (selectedCategory !== 'all') {
+      const selectedLower = selectedCategory.toLowerCase()
+      filteredPosts = filteredPosts.filter(post =>
+        post.categories.some(c => c.toLowerCase() === selectedLower)
+      )
+    }
 
-  // 태그 필터링
-  if (selectedTags.length > 0) {
-    filteredPosts = filteredPosts.filter(post =>
-      selectedTags.some(tag => post.tags.includes(tag))
-    )
-  }
+    // 검색 필터링
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase()
+      filteredPosts = filteredPosts.filter(post =>
+        post.title.toLowerCase().includes(searchLower) ||
+        post.excerpt?.toLowerCase().includes(searchLower) ||
+        post.content?.toLowerCase().includes(searchLower)
+      )
+    }
 
-  // 날짜순 정렬
-  const sortedPosts = filteredPosts.sort((a, b) => {
-    const dateA = new Date(a.date || 0)
-    const dateB = new Date(b.date || 0)
-    return dateB.getTime() - dateA.getTime()
-  })
+    // 태그 필터링
+    if (selectedTags.length > 0) {
+      filteredPosts = filteredPosts.filter(post =>
+        selectedTags.some(tag => post.tags.includes(tag))
+      )
+    }
 
-  // 페이지네이션
-  const paginatedPosts = sortedPosts.slice(0, currentPage * postsPerPage)
-  const hasMore = sortedPosts.length > currentPage * postsPerPage
+    // 날짜순 정렬
+    return filteredPosts.sort((a, b) => {
+      const dateA = new Date(a.date || 0)
+      const dateB = new Date(b.date || 0)
+      return dateB.getTime() - dateA.getTime()
+    })
+  }, [posts, selectedCategory, searchTerm, selectedTags])
+
+  // 페이지네이션 (useMemo로 최적화)
+  const { paginatedPosts, hasMore } = useMemo(() => {
+    const paginated = sortedPosts.slice(0, currentPage * postsPerPage)
+    const more = sortedPosts.length > currentPage * postsPerPage
+    return { paginatedPosts: paginated, hasMore: more }
+  }, [sortedPosts, currentPage, postsPerPage])
 
   return (
     <>
