@@ -3,10 +3,10 @@ import { readFile, writeFile } from 'fs/promises';
 interface BlogPost {
   title: string;
   slug: string;
-  category: string;
+  categories: string[];
   excerpt: string;
   tags: string[];
-  createdAt: string;
+  date: string;
 }
 
 async function generateRssFeed() {
@@ -18,20 +18,23 @@ async function generateRssFeed() {
   const baseUrl = process.env.SITE_URL || 'https://stock.advenoh.pe.kr';
 
   const sortedPosts = posts
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 20);
 
-  const rssItems = sortedPosts.map(post => `
+  const rssItems = sortedPosts.map(post => {
+    const category = post.categories[0] || 'etc';
+    return `
     <item>
       <title><![CDATA[${post.title}]]></title>
-      <link>${baseUrl}/${(post.category || 'etc').toLowerCase()}/${post.slug}</link>
-      <guid>${baseUrl}/${(post.category || 'etc').toLowerCase()}/${post.slug}</guid>
+      <link>${baseUrl}/${category.toLowerCase()}/${post.slug}</link>
+      <guid>${baseUrl}/${category.toLowerCase()}/${post.slug}</guid>
       <description><![CDATA[${post.excerpt}]]></description>
-      <pubDate>${new Date(post.createdAt).toUTCString()}</pubDate>
-      <category>${post.category}</category>
+      <pubDate>${new Date(post.date).toUTCString()}</pubDate>
+      <category>${category}</category>
       ${post.tags?.map(tag => `<category><![CDATA[${tag}]]></category>`).join('') || ''}
     </item>
-  `).join('');
+  `;
+  }).join('');
 
   const rss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">

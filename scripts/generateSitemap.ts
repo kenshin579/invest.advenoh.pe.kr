@@ -4,9 +4,8 @@ import { join } from 'path';
 interface BlogPost {
   title: string;
   slug: string;
-  category: string;
-  createdAt: string;
-  updatedAt?: string;
+  categories: string[];
+  date: string;
 }
 
 async function generateSitemap() {
@@ -26,14 +25,15 @@ async function generateSitemap() {
   ];
 
   const postUrls = posts.map(post => {
-    const postDate = new Date(post.createdAt);
+    const postDate = new Date(post.date);
     const isRecent = postDate > thirtyDaysAgo;
+    const category = post.categories[0] || 'etc';
 
     return {
-      url: `${baseUrl}/${(post.category || 'etc').toLowerCase()}/${post.slug}`,
+      url: `${baseUrl}/${category.toLowerCase()}/${post.slug}`,
       changefreq: 'weekly',
       priority: isRecent ? '0.9' : '0.8',
-      lastmod: post.updatedAt || post.createdAt
+      lastmod: post.date
     };
   });
 

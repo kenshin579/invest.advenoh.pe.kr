@@ -12,20 +12,21 @@ interface MarkdownFrontMatter {
 }
 
 interface BlogPost {
-  title: string;
   slug: string;
-  content: string;
+  title: string;
   excerpt: string;
-  category: string;
+  content: string;
+  date: string;
+  formattedDate: string;
+  author: string;
+  categories: string[];
   tags: string[];
-  series?: string;
   featuredImage?: string;
-  published: boolean;
-  seoTitle: string;
-  seoDescription: string;
-  seoKeywords: string;
-  createdAt: string;
-  updatedAt?: string;
+  readingTime: number;
+  series?: string;
+  seriesOrder?: number;
+  views: number;
+  likes: number;
 }
 
 interface CategoryData {
@@ -172,21 +173,34 @@ async function importMarkdownFiles(contentDir: string = 'contents'): Promise<Blo
               featuredImagePath = firstImage;
             }
 
+            // Calculate reading time
+            const wordsPerMinute = 200;
+            const wordCount = markdownContent.split(/\s+/).length;
+            const readingTime = Math.ceil(wordCount / wordsPerMinute);
+
+            // Format date
+            const formattedDate = new Date(frontMatter.date).toLocaleDateString('ko-KR', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            });
+
             const blogPost: BlogPost = {
-              title: frontMatter.title,
               slug,
-              content: markdownContent,
+              title: frontMatter.title,
               excerpt,
-              category: finalCategory,
+              content: markdownContent,
+              date: frontMatter.date,
+              formattedDate,
+              author: 'Frank Oh',
+              categories: [finalCategory],
               tags: frontMatter.tags || [],
+              featuredImage: featuredImagePath || undefined,
+              readingTime,
               series: frontMatter.series,
-              featuredImage: featuredImagePath,
-              published: true,
-              seoTitle: `${frontMatter.title} | 투자 인사이트`,
-              seoDescription: frontMatter.description || excerpt,
-              seoKeywords: frontMatter.tags?.join(', ') || '',
-              createdAt: frontMatter.date,
-              updatedAt: frontMatter.update
+              seriesOrder: undefined,
+              views: 0,
+              likes: 0
             };
 
             posts.push(blogPost);
@@ -209,8 +223,9 @@ function generateCategories(posts: BlogPost[]): CategoryData[] {
   const categoryCount: { [key: string]: number } = {};
 
   posts.forEach(post => {
-    const category = post.category || 'uncategorized';
-    categoryCount[category] = (categoryCount[category] || 0) + 1;
+    post.categories.forEach(category => {
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    });
   });
 
   return Object.entries(categoryCount)
@@ -231,16 +246,16 @@ function generateSeries(posts: BlogPost[]): SeriesData[] {
 
   return Array.from(seriesMap.entries()).map(([seriesName, seriesPosts]) => {
     const sortedPosts = seriesPosts
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     return {
       name: seriesName,
       count: seriesPosts.length,
-      latestDate: sortedPosts[0].createdAt,
+      latestDate: sortedPosts[0].date,
       posts: sortedPosts.map(post => ({
         title: post.title,
         slug: post.slug,
-        date: post.createdAt
+        date: post.date
       }))
     };
   });
