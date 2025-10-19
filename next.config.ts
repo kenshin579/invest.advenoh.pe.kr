@@ -3,10 +3,10 @@ import path from "path";
 import fs from "fs";
 
 const nextConfig: NextConfig = {
-  // SSR을 위한 설정 (static export 제거)
-  // output: 'export', // 주석 처리
-  
-  trailingSlash: false,
+  // Static Export 모드 활성화
+  output: 'export',
+
+  trailingSlash: true,
   images: {
     unoptimized: true,
     domains: ['stock.advenoh.pe.kr'],

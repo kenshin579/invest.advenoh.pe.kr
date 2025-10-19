@@ -2,10 +2,9 @@
   "ci": {
     "collect": {
       "url": [
-        "http://localhost:5000",
-        "http://localhost:5000/blog",
-        "http://localhost:5000/series",
-        "http://localhost:5000/contents/stock/how-to-check-stock-masters-portfolio"
+        "http://localhost:3000",
+        "http://localhost:3000/series",
+        "http://localhost:3000/stock/how-to-check-stock-masters-portfolio"
       ],
       "numberOfRuns": 3,
       "settings": {

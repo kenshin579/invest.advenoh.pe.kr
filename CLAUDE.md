@@ -206,6 +206,50 @@ SITE_URL=http://localhost:3000 # Used for SEO/sitemap generation
 - Security headers configured in `next.config.ts`
 - Compression enabled
 
+### Text Encoding (Korean Content)
+
+**Encoding Standard**: All files MUST be UTF-8 encoded (한글 콘텐츠 필수)
+
+**When creating Korean/emoji content with Claude Code**:
+
+1. **Verify encoding after file creation**:
+   ```bash
+   file -I path/to/file.md
+   # Expected: text/plain; charset=utf-8 ✅
+   # Problem:  application/octet-stream; charset=binary ❌
+   ```
+
+2. **If encoding is broken (charset=binary)**:
+   ```bash
+   # Option 1: Use Bash heredoc (most reliable)
+   cat > file.md << 'EOF'
+   한글 내용...
+   EOF
+
+   # Option 2: Re-create with Write tool
+   # (usually works, but verify with file -I afterward)
+   ```
+
+3. **Prevention tips**:
+   - Write tool generally handles UTF-8 correctly
+   - For very large files (>5000 lines), verify encoding
+   - If using Cursor/VSCode, default encoding should be UTF-8
+   - System locale (`.zshrc` settings) don't affect Claude Code tools
+
+4. **Quick encoding check**:
+   ```bash
+   # Check encoding
+   file -I docs/**/*.md
+
+   # View Korean content
+   cat file.md | head -20
+   ```
+
+**Note**: This project contains Korean content in:
+- Documentation (`docs/`)
+- Markdown blog posts (`contents/`)
+- Code comments and commit messages
+
 ## File Structure Notes
 
 ```
