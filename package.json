@@ -4,6 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "predev": "npx tsx scripts/generateStaticData.ts",
     "dev": "next dev",
     "prebuild": "npx tsx scripts/generateStaticData.ts",
     "build": "next build",

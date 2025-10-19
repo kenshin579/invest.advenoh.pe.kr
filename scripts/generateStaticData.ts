@@ -1,4 +1,4 @@
-import { readFile, readdir, stat, writeFile, mkdir } from 'fs/promises';
+import { readFile, readdir, stat, writeFile, mkdir, copyFile } from 'fs/promises';
 import { join } from 'path';
 
 interface MarkdownFrontMatter {
@@ -275,9 +275,65 @@ function generateTags(posts: BlogPost[]): { tag: string; count: number }[] {
     .map(([tag, count]) => ({ tag, count }));
 }
 
+async function copyImages(contentDir: string = 'contents'): Promise<void> {
+  console.log('\n📸 Copying images from contents/ to public/contents/...\n');
+
+  const imageExtensions = /\.(png|jpe?g|gif|webp|svg|ico)$/i;
+  let totalImagesCopied = 0;
+
+  try {
+    const categories = await readdir(contentDir);
+
+    for (const category of categories) {
+      const categoryDir = join(contentDir, category);
+      const categoryStat = await stat(categoryDir);
+
+      if (!categoryStat.isDirectory()) {
+        continue;
+      }
+
+      const folders = await readdir(categoryDir);
+
+      for (const folder of folders) {
+        const folderPath = join(categoryDir, folder);
+        const folderStat = await stat(folderPath);
+
+        if (folderStat.isDirectory()) {
+          const files = await readdir(folderPath);
+          const imageFiles = files.filter(file => imageExtensions.test(file));
+
+          if (imageFiles.length > 0) {
+            const targetDir = join('public', 'contents', category, folder);
+            await mkdir(targetDir, { recursive: true });
+
+            for (const imageFile of imageFiles) {
+              const sourcePath = join(folderPath, imageFile);
+              const targetPath = join(targetDir, imageFile);
+
+              await copyFile(sourcePath, targetPath);
+              totalImagesCopied++;
+            }
+
+            console.log(`  ✓ Copied ${imageFiles.length} image(s) from ${category}/${folder}`);
+          }
+        }
+      }
+    }
+
+    console.log(`\n✅ Total images copied: ${totalImagesCopied}`);
+  } catch (error) {
+    console.error('Error copying images:', error);
+    throw error;
+  }
+}
+
 async function main() {
   console.log('🚀 Starting static data generation...\n');
 
+  // Step 1: Copy images from contents/ to public/contents/
+  await copyImages();
+
+  // Step 2: Generate JSON data
   const posts = await importMarkdownFiles();
   const categories = generateCategories(posts);
   const series = generateSeries(posts);
