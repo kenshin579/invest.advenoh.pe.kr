@@ -15,15 +15,15 @@ interface SeriesDetailPageProps {
 export async function generateStaticParams() {
   const posts = await getAllBlogPosts()
   const seriesSet = new Set<string>()
-  
+
   posts.forEach(post => {
     if (post.series) {
       seriesSet.add(post.series)
     }
   })
-  
+
   return Array.from(seriesSet).map((series) => ({
-    seriesName: encodeURIComponent(series),
+    seriesName: series,  // Next.js automatically handles URL encoding
   }))
 }
 
