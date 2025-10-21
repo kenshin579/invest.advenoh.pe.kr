@@ -4,23 +4,21 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Korean investment insights blog built with Next.js 15 (App Router) + Express.js integration. Combines SSR capabilities with a custom Express backend for API routes and static content serving.
+Korean investment insights blog built with Next.js 15 (App Router) as a **fully static site**. All content is generated at build time and deployed to CDN/static hosting without requiring a backend server.
 
 ## Development Commands
 
 ### Running the Application
 ```bash
-# Development (Express + Next.js HMR)
+# Development (auto-generates static data, then starts Next.js dev server)
 npm run dev
 
-# Development (Next.js only - alternative)
-npm run dev:nextjs
-
-# Production build
+# Production build (generates static data, builds site, generates sitemap/RSS/robots)
 npm run build
 
-# Start production server
+# Preview production build locally
 npm run start
+# Note: Uses 'npx serve out' to serve static files from the out/ directory
 ```
 
 ### Code Quality
@@ -32,37 +30,72 @@ npm run check
 npm run lint
 ```
 
-### Database Operations
-```bash
-# Push schema changes to database
-npm run db:push
-```
-
 ### Performance Testing
 ```bash
 # Run Lighthouse CI performance tests
 npm run test:performance
 ```
 
+### Local Testing with Playwright
+After running `npm run start`, use MCP Playwright to verify the build:
+
+**Basic Navigation Test**:
+- Navigate to `http://localhost:3000`
+- Click through category pages
+- Verify blog post detail pages
+- Test search and filter functionality
+
+**Visual Verification**:
+- Take screenshots of key pages
+- Verify responsive design
+- Check Korean text rendering (UTF-8 encoding)
+
+**Accessibility Testing**:
+- Run automated accessibility checks
+- Verify keyboard navigation
+- Check ARIA labels and roles
+
+**Example Playwright Commands**:
+```typescript
+// Navigate and verify homepage
+await mcp_playwright.navigate({ url: 'http://localhost:3000' })
+await mcp_playwright.screenshot({ name: 'homepage', fullPage: true })
+
+// Test blog post page
+await mcp_playwright.click({ selector: 'a[href*="/stock/"]' })
+await mcp_playwright.screenshot({ name: 'blog-post' })
+
+// Verify search functionality
+await mcp_playwright.fill({ selector: 'input[type="search"]', value: '투자' })
+```
+
 ## Architecture Overview
 
-### Hybrid Server Architecture
+### Static Site Architecture
 
-This application uses a **hybrid Express + Next.js architecture**:
+This application uses **Next.js Static Export** (`output: 'export'`):
 
-- **Express Server** (`server/index.ts`): Main entry point that:
-  - Initializes Next.js app programmatically
-  - Registers custom API routes from `server/routes.ts`
-  - Serves static assets (`/contents`, `/attached_assets`)
-  - Forwards all other requests to Next.js handler
-  - Runs on port 3000 by default
+- **Build-Time Data Generation** (`scripts/`):
+  - `generateStaticData.ts`: Converts markdown files to JSON data files
+  - `generateSitemap.ts`: Generates sitemap.xml
+  - `generateRssFeed.ts`: Generates RSS feed
+  - `generateRobots.ts`: Generates robots.txt
 
-- **Next.js App Router** (`src/app/`): Handles SSR, routing, and client-side logic
+- **Next.js Static Generation** (`src/app/`):
+  - All pages pre-rendered as HTML at build time
+  - No server-side runtime required
+  - Deployed to CDN/static hosting (Netlify)
 
-This architecture allows:
-- Custom Express middleware and API endpoints
-- Next.js SSR and static optimization
-- Unified deployment with single server process
+- **Build Output** (`out/`):
+  - Static HTML files for all pages
+  - JSON data files in `public/data/`
+  - All assets bundled and optimized
+
+This architecture provides:
+- Zero server costs (no Node.js server required)
+- Infinite scalability via CDN
+- Fast loading times (static files)
+- Simple deployment process
 
 ### Content Management System
 
@@ -80,26 +113,33 @@ Blog posts are **markdown-based** with frontmatter:
   series: string (optional)
   ```
 
-**Content Import Flow**:
-1. Server startup triggers `importMarkdownFiles()` in `server/routes.ts:14-16`
-2. Markdown files parsed via `gray-matter`
-3. Content stored in storage layer (in-memory or database)
-4. Available via `/api/blog-posts` endpoints
+**Build-Time Data Generation Flow**:
+1. `npm run dev` or `npm run build` triggers `scripts/generateStaticData.ts`
+2. Script scans `contents/` directory for all markdown files
+3. Markdown files parsed via `gray-matter`
+4. Content transformed to JSON and saved to `public/data/`:
+   - `posts.json`: All blog posts with metadata and content
+   - `categories.json`: Category list with post counts
+   - `series.json`: Series information with related posts
+   - `tags.json`: Tag cloud data
+5. Pages access data by importing JSON files or using fetch in client components
 
 ### Path Aliases
 
 TypeScript path resolution:
 - `@/*` → `./src/*`
-- `@shared/*` → `./shared/*`
 
-### Database Layer
+### Data Layer
 
-**Drizzle ORM** with PostgreSQL:
-- Schema: `shared/schema.ts`
-- Config: `drizzle.config.ts`
-- Tables: `users`, `blog_posts`, `newsletter_subscribers`
-
-**Storage Abstraction**: `server/storage.ts` provides in-memory fallback when database is unavailable
+**Static JSON Files** (no database required):
+- Generated at build time by `scripts/generateStaticData.ts`
+- Stored in `public/data/` directory
+- Accessed via direct imports or fetch() in client components
+- Files:
+  - `posts.json`: All blog posts (~103 posts)
+  - `categories.json`: Category metadata
+  - `series.json`: Series information
+  - `tags.json`: Tag metadata
 
 ### UI Components
 
@@ -114,30 +154,41 @@ TypeScript path resolution:
 - `series-navigation.tsx`: Series post navigation
 - `related-posts.tsx`: Related content suggestions
 
-### API Routes Structure
+### Data Access Pattern
 
-Express API routes (`server/routes.ts`):
-- `GET /api/blog-posts` - List posts with filtering (category, search, series)
-- `GET /api/blog-posts/:slug` - Get single post (increments views)
-- `GET /api/categories` - Top 5 categories with counts
-- `GET /api/series` - All series with post lists
-- `POST /api/newsletter/subscribe` - Newsletter subscription
-- `GET /rss.xml` - RSS feed generation
-- `GET /sitemap.xml` - Sitemap generation
-- `GET /image-sitemap.xml` - Image sitemap
-- `GET /robots.txt` - Robots.txt
+**No API routes** - all data is static:
 
-Client-side API helpers: `src/lib/blog-client.ts`
+**Static Files** (generated at build time):
+- `/data/posts.json` - All blog posts with metadata
+- `/data/categories.json` - Category information
+- `/data/series.json` - Series information
+- `/data/tags.json` - Tag metadata
+- `/rss.xml` - RSS feed (via `scripts/generateRssFeed.ts`)
+- `/sitemap.xml` - Sitemap (via `scripts/generateSitemap.ts`)
+- `/robots.txt` - Robots.txt (via `scripts/generateRobots.ts`)
+
+**Data Access Methods**:
+- Server Components: Direct file system access via `src/lib/blog-server.ts`
+- Client Components: Fetch JSON files or import directly
+- All filtering/searching done client-side
 
 ### Key Libraries in `src/lib/`
 
-- `blog-server.ts` / `blog-client.ts`: Blog data fetching utilities
+- `blog-server.ts`: Server-side data fetching from file system
+- `blog-client.ts`: Client-side data fetching from JSON files
 - `markdown.ts`: Markdown processing with remark/rehype
 - `json-ld-schema.ts`: Structured data for SEO
 - `content-management.ts`: Content utilities
 - `image-utils.ts`: Image optimization helpers
 - `date-utils.ts`: Date formatting utilities
 - `error-handling.ts` / `error-boundary.tsx`: Error management
+
+### Build Scripts in `scripts/`
+
+- `generateStaticData.ts`: Main script that converts markdown to JSON
+- `generateSitemap.ts`: Generates sitemap.xml for SEO
+- `generateRssFeed.ts`: Generates RSS feed
+- `generateRobots.ts`: Generates robots.txt
 
 ## Git Commit Conventions
 
@@ -177,10 +228,12 @@ Client-side API helpers: `src/lib/blog-client.ts`
 - Build errors and TypeScript errors are **ignored** in production builds (`ignoreBuildErrors: true`)
 - Still run `npm run check` during development to catch issues early
 
-### Content Reloading
-- Markdown files are imported on **server startup only**
-- To reload content changes, restart the server
-- Consider adding hot reload for content in development if needed
+### Content Updates
+- Markdown files are converted to JSON at **build time only**
+- To see content changes:
+  - **Development**: Restart `npm run dev` to regenerate JSON files
+  - **Production**: Run `npm run build` to rebuild the entire site
+- Content updates require a full rebuild and redeployment
 
 ### Image Optimization
 - Images in `public/contents/` are served with 1-year cache headers
@@ -188,11 +241,12 @@ Client-side API helpers: `src/lib/blog-client.ts`
 - WebP/AVIF formats preferred
 
 ### Environment Variables
-Required variables (create `.env.local`):
+Optional variables (create `.env.local` if needed):
 ```bash
-DATABASE_URL=postgresql://...  # Optional, falls back to in-memory storage
-SITE_URL=http://localhost:3000 # Used for SEO/sitemap generation
+SITE_URL=https://invest.advenoh.pe.kr # Used for SEO/sitemap generation (defaults to localhost)
 ```
+
+**Note**: No database or backend configuration needed - this is a fully static site.
 
 ### SEO & Analytics
 - Structured data: JSON-LD schemas in `src/lib/json-ld-schema.ts`
@@ -257,50 +311,124 @@ SITE_URL=http://localhost:3000 # Used for SEO/sitemap generation
 ├── src/                   # Next.js source
 │   ├── app/              # App Router pages
 │   │   ├── [category]/  # Dynamic category pages
-│   │   ├── api/         # Next.js API routes (minimal, most in server/)
 │   │   └── series/      # Series pages
 │   ├── components/       # React components
 │   │   └── ui/          # shadcn/ui components (DO NOT edit manually)
 │   ├── lib/             # Utilities and helpers
 │   └── middleware.ts    # Next.js middleware
-├── server/               # Express backend
-│   ├── index.ts         # Server entry point
-│   ├── routes.ts        # API route definitions
-│   ├── storage.ts       # Data storage abstraction
-│   └── services/        # Service layer (RSS, sitemap, etc.)
-├── shared/              # Shared between server and client
-│   └── schema.ts        # Drizzle schemas and Zod validators
-├── contents/            # Markdown blog posts
+├── scripts/              # Build-time scripts
+│   ├── generateStaticData.ts  # Markdown → JSON conversion
+│   ├── generateSitemap.ts     # Sitemap generation
+│   ├── generateRssFeed.ts     # RSS feed generation
+│   └── generateRobots.ts      # robots.txt generation
+├── contents/             # Markdown blog posts
 │   ├── etc/
 │   ├── etf/
 │   ├── stock/
 │   └── weekly/
-└── public/              # Static assets
-    └── contents/        # Blog post images
+├── public/               # Static assets
+│   ├── contents/        # Blog post images
+│   └── data/            # Generated JSON files (gitignored)
+│       ├── posts.json
+│       ├── categories.json
+│       ├── series.json
+│       └── tags.json
+└── out/                  # Build output (gitignored)
+    └── (static HTML files)
 ```
+
+**Note**: `server/`, `shared/`, and `src/app/api/` directories have been removed in the static site conversion.
 
 ## Development Workflow
 
-1. **Adding Blog Posts**: Create `contents/{category}/{slug}/index.md` with frontmatter
-2. **Adding Components**: Create in `src/components/` or add shadcn component via CLI
-3. **API Changes**: Modify `server/routes.ts` for custom endpoints
-4. **Schema Changes**: Update `shared/schema.ts` then run `npm run db:push`
-5. **Type Checking**: Run `npm run check` before committing
-6. **Testing**: Run build locally with `npm run build` to catch issues
+1. **Adding Blog Posts**:
+   - Create `contents/{category}/{slug}/index.md` with frontmatter
+   - Restart `npm run dev` or run build to regenerate JSON data
+
+2. **Adding Components**:
+   - Create in `src/components/` or add shadcn component via CLI
+
+3. **Modifying Build Scripts**:
+   - Edit files in `scripts/` directory
+   - Test with `npm run build` to verify output
+
+4. **Type Checking**:
+   - Run `npm run check` before committing
+
+5. **Testing**:
+   - Run `npm run build` to generate static site
+   - Run `npm run start` to preview locally (serves on http://localhost:3000)
+   - **Verify with Playwright**: Use MCP Playwright to test the local build
+     - Navigate to pages and verify rendering
+     - Test interactive features (search, filters, navigation)
+     - Capture screenshots for visual validation
+     - Check accessibility and performance
+
+6. **Deployment**:
+   - Push to main branch
+   - CI/CD automatically builds and deploys to Netlify
 
 ## Common Tasks
 
 ### Adding a New Blog Post Category
-1. Add markdown files to `contents/{new-category}/`
-2. No code changes needed - categories auto-discovered from content
+1. Create directory: `contents/{new-category}/`
+2. Add markdown files with proper frontmatter
+3. Run `npm run dev` or `npm run build` to regenerate data
+4. Categories are auto-discovered from content
 
-### Modifying API Endpoints
-Edit `server/routes.ts` - hot reload works in development mode
-
-### Adding Database Fields
-1. Update schema in `shared/schema.ts`
-2. Run `npm run db:push` to apply changes
-3. Update TypeScript types (auto-inferred from schema)
+### Modifying Build Scripts
+1. Edit scripts in `scripts/` directory
+2. Common scripts to modify:
+   - `generateStaticData.ts`: Data generation logic
+   - `generateSitemap.ts`: Sitemap generation rules
+   - `generateRssFeed.ts`: RSS feed customization
+3. Test with `npm run build`
 
 ### Working with Series
-Series are defined in post frontmatter via `series: "series-name"`. Related posts automatically grouped via `/api/series` endpoint.
+1. Add `series: "series-name"` to post frontmatter
+2. All posts with same series name are automatically grouped
+3. Series data generated in `public/data/series.json`
+4. Access via `src/lib/blog-server.ts` or `blog-client.ts`
+
+### Updating Static Data Structure
+1. Modify `scripts/generateStaticData.ts`
+2. Update TypeScript types if needed
+3. Update components that consume the data
+4. Test with full rebuild: `npm run build`
+
+### Local Testing Workflow with Playwright
+1. **Build and serve**:
+   ```bash
+   npm run build
+   npm run start  # Serves on http://localhost:3000
+   ```
+
+2. **Automated testing with Playwright**:
+   - Navigate to key pages and verify content rendering
+   - Test interactive features (search, filters, category navigation)
+   - Capture screenshots for visual regression testing
+   - Verify Korean text encoding (UTF-8)
+   - Check accessibility compliance
+
+3. **Common test scenarios**:
+   ```typescript
+   // Homepage verification
+   navigate → screenshot → verify Korean text
+
+   // Blog post page
+   navigate → click post link → verify content → screenshot
+
+   // Category filtering
+   navigate → select category → verify filtered results
+
+   // Search functionality
+   navigate → fill search input → verify results
+
+   // Series navigation
+   navigate to series post → verify prev/next links
+   ```
+
+4. **Performance validation**:
+   - Use Playwright to measure page load times
+   - Check for console errors or warnings
+   - Verify all images load correctly

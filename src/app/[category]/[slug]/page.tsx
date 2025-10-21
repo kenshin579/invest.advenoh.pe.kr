@@ -205,7 +205,8 @@ export default async function CategorySlugPage({ params }: CategorySlugPageProps
                   </>
                 )}
               </div>
-              
+
+              {/* Featured Image 비활성화 - Issue #6: Article header에서 이미지 제거
               {post.featuredImage && (
                 <div className="relative overflow-hidden rounded-lg mb-6">
                   <img
@@ -216,6 +217,7 @@ export default async function CategorySlugPage({ params }: CategorySlugPageProps
                   />
                 </div>
               )}
+              */}
             </header>
 
             {/* Series list for same series */}
