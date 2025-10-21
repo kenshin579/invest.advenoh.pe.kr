@@ -5,6 +5,7 @@ import { Footer } from '@/components/footer'
 import { ThemeProvider } from '@/components/theme-provider'
 import ClientOnly from '@/components/ClientOnly'
 import React from 'react'
+import { Metadata } from 'next'
 
 // 폰트 최적화 설정
 const inter = Inter({
@@ -22,7 +23,26 @@ const notoSansKR = Noto_Sans_KR({
   preload: true,
 })
 
-// 메타데이터 설정 (metadata 객체 대신 직접 정의)
+// 메타데이터 설정
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
+
+export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
+  title: '투자 인사이트 - 주식, ETF, 채권, 펀드 전문 블로그',
+  description: '투자에 대한 깊이 있는 인사이트와 실전 경험을 공유하는 전문 금융 블로그입니다.',
+  keywords: ['투자', '주식', 'ETF', '채권', '펀드', '금융', '재테크'],
+  openGraph: {
+    type: 'website',
+    locale: 'ko_KR',
+    url: baseUrl,
+    siteName: '투자 인사이트',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  }
+}
+
 const siteMetadata = {
   title: '투자 인사이트 - 주식, ETF, 채권, 펀드 전문 블로그',
   description: '투자에 대한 깊이 있는 인사이트와 실전 경험을 공유하는 전문 금융 블로그입니다.',
@@ -30,7 +50,7 @@ const siteMetadata = {
   openGraph: {
     type: 'website',
     locale: 'ko_KR',
-    url: process.env.SITE_URL || 'https://stock.advenoh.pe.kr',
+    url: baseUrl,
     siteName: '투자 인사이트',
   },
   robots: {
@@ -40,9 +60,9 @@ const siteMetadata = {
 }
 
 // 메타데이터를 순회하면서 메타 태그를 생성하는 함수
-function generateMetaTags(metadata: typeof siteMetadata): React.ReactElement[] {
+function generateMetaTags(metadata: Omit<typeof siteMetadata, 'metadataBase'>): React.ReactElement[] {
   const metaTags: React.ReactElement[] = []
-  
+
   // title 처리
   metaTags.push(<title key="title">{metadata.title}</title>)
   
@@ -90,7 +110,7 @@ export default function RootLayout({
         <meta name="naver-site-verification" content="1e8908d89d0bff3a013d83b763543f37049a907f" />
         <meta name="msvalidate.01" content="6B5D48FAB4AC7D1E78A51352B904624B" />
         <link rel="icon" href="/favicon.ico" />
-        {generateMetaTags(siteMetadata)}
+        {generateMetaTags({...siteMetadata, metadataBase: undefined})}
         
         {/* Google Analytics */}
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-9LNH27K1YS"></script>

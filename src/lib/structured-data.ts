@@ -128,7 +128,7 @@ export function combineSchemas(...schemas: unknown[]) {
 
 // Main generateStructuredData function
 export function generateStructuredData(type: 'website' | 'blog' | 'article', data?: unknown) {
-  const baseUrl = process.env.SITE_URL || 'https://stock.advenoh.pe.kr'
+  const baseUrl = process.env.SITE_URL || 'https://invest.advenoh.pe.kr'
   
   switch (type) {
     case 'website':
