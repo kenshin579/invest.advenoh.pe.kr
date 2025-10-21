@@ -3,7 +3,7 @@ import { writeFile } from 'fs/promises';
 async function generateRobots() {
   console.log('🤖 Generating robots.txt...');
 
-  const baseUrl = process.env.SITE_URL || 'https://stock.advenoh.pe.kr';
+  const baseUrl = process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
 
   const robots = `User-agent: *
 Allow: /

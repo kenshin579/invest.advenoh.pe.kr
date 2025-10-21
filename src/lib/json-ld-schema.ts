@@ -81,7 +81,7 @@ export interface BreadcrumbSchema {
 
 class JSONLDSchemaGenerator {
   private static instance: JSONLDSchemaGenerator;
-  private baseUrl = 'https://stock.advenoh.pe.kr';
+  private baseUrl = process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
   private organizationName = 'Stock Advenoh';
   private organizationDescription = '주식 투자 정보와 ETF 분석을 제공하는 웹사이트';
 

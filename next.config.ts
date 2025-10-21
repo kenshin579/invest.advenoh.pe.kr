@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
     unoptimized: true,
-    domains: ['stock.advenoh.pe.kr'],
+    domains: ['invest.advenoh.pe.kr'],
     formats: ['image/webp', 'image/avif'],
   },
   experimental: {
