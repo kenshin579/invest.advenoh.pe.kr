@@ -192,4 +192,4 @@ M&A(인수합병)는 일반적으로 시장에서 **성장 기대감**을 불러
 
 - [유목민의 투자의 정석](https://ridibooks.com/books/606002505?_s=search&_q=투자의+정석&_rdt_sid=SearchBookListWithTab)
 - [어닝서프라이즈](https://www.notion.so/26d46a2166e38063a632f692f786ed83?pvs=21)
-- [유상증자는 주식에 어떤 영향을 주나](https://stock.advenoh.pe.kr/stock/how-does-rights-offering-affect-stocks)
+- [유상증자는 주식에 어떤 영향을 주나](https://investment.advenoh.pe.kr/stock/how-does-rights-offering-affect-stocks)
