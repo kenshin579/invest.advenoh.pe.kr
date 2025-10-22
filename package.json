@@ -6,9 +6,8 @@
   "scripts": {
     "predev": "npx tsx scripts/generateStaticData.ts",
     "dev": "next dev",
-    "prebuild": "npx tsx scripts/generateStaticData.ts",
+    "prebuild": "npx tsx scripts/generateStaticData.ts && npx tsx scripts/generateSitemap.ts && npx tsx scripts/generateRssFeed.ts && npx tsx scripts/generateRobots.ts",
     "build": "next build",
-    "postbuild": "npx tsx scripts/generateSitemap.ts && npx tsx scripts/generateRssFeed.ts && npx tsx scripts/generateRobots.ts",
     "start": "npx serve out",
     "check": "tsc",
     "lint": "next lint",
