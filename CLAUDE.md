@@ -243,7 +243,7 @@ TypeScript path resolution:
 ### Environment Variables
 Optional variables (create `.env.local` if needed):
 ```bash
-SITE_URL=https://invest.advenoh.pe.kr # Used for SEO/sitemap generation (defaults to localhost)
+SITE_URL=https://investment.advenoh.pe.kr # Used for SEO/sitemap generation (defaults to localhost)
 ```
 
 **Note**: No database or backend configuration needed - this is a fully static site.

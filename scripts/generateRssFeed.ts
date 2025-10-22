@@ -15,7 +15,7 @@ async function generateRssFeed() {
   const postsData = await readFile('public/data/posts.json', 'utf-8');
   const posts: BlogPost[] = JSON.parse(postsData);
 
-  const baseUrl = process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
+  const baseUrl = process.env.SITE_URL || 'https://investment.advenoh.pe.kr';
 
   const sortedPosts = posts
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())

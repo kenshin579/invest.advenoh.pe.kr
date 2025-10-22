@@ -24,7 +24,7 @@ const notoSansKR = Noto_Sans_KR({
 })
 
 // 메타데이터 설정
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || 'https://investment.advenoh.pe.kr';
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

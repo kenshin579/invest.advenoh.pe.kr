@@ -171,7 +171,7 @@ class OGImageGenerator {
     if (typeof window !== 'undefined') {
       return window.location.href;
     }
-    return 'https://stock.advenoh.pe.kr';
+    return 'https://investment.advenoh.pe.kr';
   }
 
   // 기본 URL 가져오기
@@ -179,7 +179,7 @@ class OGImageGenerator {
     if (typeof window !== 'undefined') {
       return window.location.origin;
     }
-    return 'https://stock.advenoh.pe.kr';
+    return 'https://investment.advenoh.pe.kr';
   }
 
   // 제목 길이 제한

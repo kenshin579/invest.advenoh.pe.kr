@@ -9,7 +9,7 @@
 
   # Environment variables (if needed)
   # [build.environment]
-  #   SITE_URL = "https://invest.advenoh.pe.kr"
+  #   SITE_URL = "https://investment.advenoh.pe.kr"
 
 # Redirect rules
 [[redirects]]

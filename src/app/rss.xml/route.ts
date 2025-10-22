@@ -5,7 +5,7 @@ export const dynamic = 'force-static'
 
 export async function GET() {
   const posts = await getAllBlogPosts()
-  const baseUrl = process.env.SITE_URL || 'https://stock.advenoh.pe.kr'
+  const baseUrl = process.env.SITE_URL || 'https://investment.advenoh.pe.kr'
   
   const rssItems = posts.map(post => `
     <item>
