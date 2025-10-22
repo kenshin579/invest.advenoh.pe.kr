@@ -51,19 +51,19 @@ export default function RootLayout({
   return (
     <html lang="ko" className={`${inter.variable} ${notoSansKR.variable}`}>
       <head>
-        <meta name="naver-site-verification" content="1e8908d89d0bff3a013d83b763543f37049a907f" />
+        <meta name="naver-site-verification" content="531df30d4cd2fb3d7c5735bf081e668dca05794c" />
         <meta name="msvalidate.01" content="6B5D48FAB4AC7D1E78A51352B904624B" />
         <link rel="icon" href="/favicon.ico" />
 
         {/* Google Analytics */}
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-9LNH27K1YS"></script>
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWDKCB9644"></script>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
               gtag('js', new Date());
-              gtag('config', 'G-9LNH27K1YS');
+              gtag('config', 'G-DWDKCB9644');
             `
           }}
         />
