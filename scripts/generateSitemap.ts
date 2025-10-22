@@ -14,7 +14,7 @@ async function generateSitemap() {
   const postsData = await readFile('public/data/posts.json', 'utf-8');
   const posts: BlogPost[] = JSON.parse(postsData);
 
-  const baseUrl = process.env.SITE_URL || 'https://invest.advenoh.pe.kr';
+  const baseUrl = process.env.SITE_URL || 'https://investment.advenoh.pe.kr';
 
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

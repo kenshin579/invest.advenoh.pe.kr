@@ -21,11 +21,11 @@ class TwitterCardGenerator {
     card: 'summary_large_image',
     title: '투자 인사이트 - 주식, ETF, 채권, 펀드 전문 블로그',
     description: '국내외 주식, ETF, 채권, 펀드에 대한 전문적인 투자 정보와 분석을 제공하는 블로그입니다.',
-    image: 'https://stock.advenoh.pe.kr/api/og-image',
+    image: 'https://investment.advenoh.pe.kr/api/og-image',
     imageAlt: '투자 인사이트 - 주식 투자 정보와 ETF 분석',
     site: '@advenoh',
     creator: '@advenoh',
-    domain: 'stock.advenoh.pe.kr',
+    domain: 'investment.advenoh.pe.kr',
   };
 
   private constructor() {}
@@ -183,7 +183,7 @@ class TwitterCardGenerator {
       color: #657786;
       margin-bottom: 4px;
     ">
-      ${data.domain || 'stock.advenoh.pe.kr'}
+      ${data.domain || 'investment.advenoh.pe.kr'}
     </div>
     <div style="
       font-size: 16px;
@@ -335,7 +335,7 @@ class TwitterCardGenerator {
     if (typeof window !== 'undefined') {
       return window.location.href;
     }
-    return 'https://stock.advenoh.pe.kr';
+    return 'https://investment.advenoh.pe.kr';
   }
 
   // 기본 URL 가져오기
@@ -343,7 +343,7 @@ class TwitterCardGenerator {
     if (typeof window !== 'undefined') {
       return window.location.origin;
     }
-    return 'https://stock.advenoh.pe.kr';
+    return 'https://investment.advenoh.pe.kr';
   }
 }
 
